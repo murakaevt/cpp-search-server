@@ -78,6 +78,7 @@ void TestMatchedDocuments() {
         const auto [matched_words, status] = server.MatchDocument("dog and cat"s, 100);
         const vector<string> expected_result = { "cat"s, "dog"s };
         ASSERT_EQUAL(expected_result, matched_words);
+        ASSERT(status == DocumentStatus::ACTUAL);
     }
 
     {
@@ -127,6 +128,7 @@ void TestDocumentSearchByPredicate() {
     const auto found_docs = server.FindTopDocuments("in the cat"s, [](int document_id, DocumentStatus status, int rating) { return rating > 0; });
 
     {
+        ASSERT_EQUAL(found_docs.size(), 1);
         ASSERT_HINT(found_docs[0].id == 100, "Wrong predicate");
     }
 }
@@ -145,11 +147,15 @@ void TestDocumentSearchByStatus() {
     server.AddDocument(doc_id2, content2, DocumentStatus::IRRELEVANT, ratings);
     server.AddDocument(doc_id3, content3, DocumentStatus::IRRELEVANT, ratings);
     const auto found_docs = server.FindTopDocuments("in the cat"s, DocumentStatus::IRRELEVANT);
-
+    const auto found_docs_ = server.FindTopDocuments("in the cat"s, DocumentStatus::BANNED);
     {
         ASSERT_HINT(found_docs[0].id == doc_id2, "Wrong status");
         ASSERT_HINT(found_docs[1].id == doc_id3, "Wrong status");
         ASSERT_HINT(found_docs.size() == 2, "Wrong status request");
+    }
+
+    {
+        ASSERT_HINT(found_docs_.empty(), "Wrong status request");
     }
 }
 
