@@ -1,12 +1,12 @@
 
 
-// -------- Начало модульных тестов поисковой системы ----------
+// -------- РќР°С‡Р°Р»Рѕ РјРѕРґСѓР»СЊРЅС‹С… С‚РµСЃС‚РѕРІ РїРѕРёСЃРєРѕРІРѕР№ СЃРёСЃС‚РµРјС‹ ----------
 
-// Тест проверяет, что поисковая система исключает стоп-слова при добавлении документов
+// РўРµСЃС‚ РїСЂРѕРІРµСЂСЏРµС‚, С‡С‚Рѕ РїРѕРёСЃРєРѕРІР°СЏ СЃРёСЃС‚РµРјР° РёСЃРєР»СЋС‡Р°РµС‚ СЃС‚РѕРї-СЃР»РѕРІР° РїСЂРё РґРѕР±Р°РІР»РµРЅРёРё РґРѕРєСѓРјРµРЅС‚РѕРІ
 void TestExcludeStopWordsFromAddedDocumentContent() {
     const int doc_id = 42;
     const string content = "cat in the city"s;
-    const vector<int> ratings = { 1, 2, 3 };
+    const vector<int> ratings = {1, 2, 3};
     {
         SearchServer server;
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
@@ -21,14 +21,14 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
         server.SetStopWords("in the"s);
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         ASSERT_HINT(server.FindTopDocuments("in"s).empty(),
-            "Stop words must be excluded from documents"s);
+                    "Stop words must be excluded from documents"s);
     }
 }
 
 /*
-Разместите код остальных тестов здесь
+Р Р°Р·РјРµСЃС‚РёС‚Рµ РєРѕРґ РѕСЃС‚Р°Р»СЊРЅС‹С… С‚РµСЃС‚РѕРІ Р·РґРµСЃСЊ
 */
-// Добавление документов. Добавленный документ должен находиться по поисковому запросу, который содержит слова из документа. 
+// Р”РѕР±Р°РІР»РµРЅРёРµ РґРѕРєСѓРјРµРЅС‚РѕРІ. Р”РѕР±Р°РІР»РµРЅРЅС‹Р№ РґРѕРєСѓРјРµРЅС‚ РґРѕР»Р¶РµРЅ РЅР°С…РѕРґРёС‚СЊСЃСЏ РїРѕ РїРѕРёСЃРєРѕРІРѕРјСѓ Р·Р°РїСЂРѕСЃСѓ, РєРѕС‚РѕСЂС‹Р№ СЃРѕРґРµСЂР¶РёС‚ СЃР»РѕРІР° РёР· РґРѕРєСѓРјРµРЅС‚Р°.
 void TestFindAddedDocumentByDocumentWord() {
     const int doc_id = 42;
     const string content = "cat in the city"s;
@@ -48,7 +48,7 @@ void TestFindAddedDocumentByDocumentWord() {
     }
 }
 
-// Поддержка минус-слов. Документы, содержащие минус-слова из поискового запроса, не должны включаться в результаты поиска. 
+// РџРѕРґРґРµСЂР¶РєР° РјРёРЅСѓСЃ-СЃР»РѕРІ. Р”РѕРєСѓРјРµРЅС‚С‹, СЃРѕРґРµСЂР¶Р°С‰РёРµ РјРёРЅСѓСЃ-СЃР»РѕРІР° РёР· РїРѕРёСЃРєРѕРІРѕРіРѕ Р·Р°РїСЂРѕСЃР°, РЅРµ РґРѕР»Р¶РЅС‹ РІРєР»СЋС‡Р°С‚СЊСЃСЏ РІ СЂРµР·СѓР»СЊС‚Р°С‚С‹ РїРѕРёСЃРєР°.
 void TestExcludeDocumentsWithMinusWordsFromResults() {
     SearchServer server;
     server.AddDocument(1, "red cat goes home"s, DocumentStatus::ACTUAL, { 1,2,3 });
@@ -68,7 +68,7 @@ void TestExcludeDocumentsWithMinusWordsFromResults() {
 
 }
 
-// Соответствие документов поисковому запросу. 
+// РЎРѕРѕС‚РІРµС‚СЃС‚РІРёРµ РґРѕРєСѓРјРµРЅС‚РѕРІ РїРѕРёСЃРєРѕРІРѕРјСѓ Р·Р°РїСЂРѕСЃСѓ.
 void TestMatchedDocuments() {
     SearchServer server;
     server.SetStopWords("and in on"s);
@@ -83,13 +83,13 @@ void TestMatchedDocuments() {
 
     {
         const auto [matched_words, status] = server.MatchDocument("dog and -cat"s, 100);
-        const vector<string> expected_result = {}; // пустой результат поскольку есть минус-слово 
+        const vector<string> expected_result = {}; // РїСѓСЃС‚РѕР№ СЂРµР·СѓР»СЊС‚Р°С‚ РїРѕСЃРєРѕР»СЊРєСѓ РµСЃС‚СЊ РјРёРЅСѓСЃ-СЃР»РѕРІРѕ
         ASSERT_EQUAL(expected_result, matched_words);
         ASSERT(matched_words.empty());
     }
 }
 
-// Сортировка найденных документов по релевантности. 
+// РЎРѕСЂС‚РёСЂРѕРІРєР° РЅР°Р№РґРµРЅРЅС‹С… РґРѕРєСѓРјРµРЅС‚РѕРІ РїРѕ СЂРµР»РµРІР°РЅС‚РЅРѕСЃС‚Рё.
 void TestSortResultsByRelevance() {
     SearchServer server;
     server.AddDocument(100, "fluffy cat fluffy tail"s, DocumentStatus::ACTUAL, { 1, 2, 3 });
@@ -105,7 +105,7 @@ void TestSortResultsByRelevance() {
     }
 }
 
-// Вычисление рейтинга документов. 
+// Р’С‹С‡РёСЃР»РµРЅРёРµ СЂРµР№С‚РёРЅРіР° РґРѕРєСѓРјРµРЅС‚РѕРІ.
 void TestCalculateDocumentRating() {
     SearchServer server;
     const vector<int> ratings = { 10, 11, 3 };
@@ -119,7 +119,7 @@ void TestCalculateDocumentRating() {
     }
 }
 
-// Фильтрация результатов поиска с использованием предиката. 
+// Р¤РёР»СЊС‚СЂР°С†РёСЏ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ РїРѕРёСЃРєР° СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј РїСЂРµРґРёРєР°С‚Р°.
 void TestDocumentSearchByPredicate() {
     SearchServer server;
     server.AddDocument(100, "cat in the city"s, DocumentStatus::ACTUAL, { 1, 2, 3 });
@@ -133,7 +133,7 @@ void TestDocumentSearchByPredicate() {
     }
 }
 
-// Поиск документов, имеющих заданный статус. 
+// РџРѕРёСЃРє РґРѕРєСѓРјРµРЅС‚РѕРІ, РёРјРµСЋС‰РёС… Р·Р°РґР°РЅРЅС‹Р№ СЃС‚Р°С‚СѓСЃ.
 void TestDocumentSearchByStatus() {
     const int doc_id1 = 42;
     const int doc_id2 = 43;
@@ -146,20 +146,22 @@ void TestDocumentSearchByStatus() {
     server.AddDocument(doc_id1, content1, DocumentStatus::ACTUAL, ratings);
     server.AddDocument(doc_id2, content2, DocumentStatus::IRRELEVANT, ratings);
     server.AddDocument(doc_id3, content3, DocumentStatus::IRRELEVANT, ratings);
-    const auto found_docs = server.FindTopDocuments("in the cat"s, DocumentStatus::IRRELEVANT);
-    const auto found_docs_ = server.FindTopDocuments("in the cat"s, DocumentStatus::BANNED);
+
+
     {
+         const auto found_docs = server.FindTopDocuments("in the cat"s, DocumentStatus::IRRELEVANT);
+        ASSERT_HINT(found_docs.size() == 2, "Wrong status request");
         ASSERT_HINT(found_docs[0].id == doc_id2, "Wrong status");
         ASSERT_HINT(found_docs[1].id == doc_id3, "Wrong status");
-        ASSERT_HINT(found_docs.size() == 2, "Wrong status request");
     }
 
     {
-        ASSERT_HINT(found_docs_.empty(), "Wrong status request");
+        const auto found_docs = server.FindTopDocuments("in the cat"s, DocumentStatus::BANNED);
+        ASSERT_HINT(found_docs.empty(), "Wrong status request");
     }
 }
 
-// Корректное вычисление релевантности найденных документов. 
+// РљРѕСЂСЂРµРєС‚РЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ СЂРµР»РµРІР°РЅС‚РЅРѕСЃС‚Рё РЅР°Р№РґРµРЅРЅС‹С… РґРѕРєСѓРјРµРЅС‚РѕРІ.
 void TestCalculateRelevance() {
     SearchServer server;
     server.AddDocument(100, "white cat with new ring"s, DocumentStatus::ACTUAL, { 1, 2, 3 });
@@ -173,7 +175,7 @@ void TestCalculateRelevance() {
     }
 }
 
-// Функция TestSearchServer является точкой входа для запуска тестов 
+// Р¤СѓРЅРєС†РёСЏ TestSearchServer СЏРІР»СЏРµС‚СЃСЏ С‚РѕС‡РєРѕР№ РІС…РѕРґР° РґР»СЏ Р·Р°РїСѓСЃРєР° С‚РµСЃС‚РѕРІ
 void TestSearchServer() {
     RUN_TEST(TestExcludeStopWordsFromAddedDocumentContent);
     RUN_TEST(TestFindAddedDocumentByDocumentWord);
@@ -186,5 +188,5 @@ void TestSearchServer() {
     RUN_TEST(TestCalculateRelevance);
 }
 
-// --------- Окончание модульных тестов поисковой системы -----------
+// --------- РћРєРѕРЅС‡Р°РЅРёРµ РјРѕРґСѓР»СЊРЅС‹С… С‚РµСЃС‚РѕРІ РїРѕРёСЃРєРѕРІРѕР№ СЃРёСЃС‚РµРјС‹ -----------
 
