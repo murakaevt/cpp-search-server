@@ -81,15 +81,11 @@ enum class DocumentStatus {
 class SearchServer {
 public:
 
-    inline static constexpr int INVALID_DOCUMENT_ID = -1;
-
     template <typename StringContainer>
     explicit SearchServer(const StringContainer& stop_words)
         : stop_words_(MakeUniqueNonEmptyStrings(stop_words)) {
-        for (const auto& word : stop_words_) {
-            if (!IsValidWord(word)) {
-                throw invalid_argument("Стоп-слово содержит недопустимые символы"s);
-            }
+        if (!none_of(stop_words_.begin(), stop_words_.end(), [](string word) {return !IsValidWord(word);})) {
+            throw invalid_argument("Стоп-слово содержит недопустимые символы"s);
         }
     }
 
@@ -97,11 +93,6 @@ public:
         : SearchServer(
             SplitIntoWords(stop_words_text))  // Invoke delegating constructor from string container
     {
-        for (const auto& word : stop_words_) {
-            if (!IsValidWord(word)) {
-                throw invalid_argument("Стоп-слово содержит недопустимые символы"s);
-            }
-        }
     }
 
     void AddDocument(int document_id, const string& document, DocumentStatus status,
@@ -111,15 +102,13 @@ public:
             throw invalid_argument("Попытка добавить документ с отрицательным id"s);
         }
 
-        if (documents_.find(document_id) != documents_.end()) {
+        if (documents_.count(document_id) != 0) {
             throw invalid_argument("Попытка добавить документ c id ранее добавленного документа"s);
         }
 
         const vector<string> words = SplitIntoWordsNoStop(document);
-        for (auto& word : words) {
-            if (!IsValidWord(word)) {
-                throw invalid_argument("Наличие недопустимых символов в тексте добавляемого документа"s);
-            }
+        if (!none_of(words.begin(), words.end(), [](string word) {return !IsValidWord(word);})) {
+            throw invalid_argument("Наличие недопустимых символов в тексте добавляемого документа"s);
         }
 
         const double inv_word_count = 1.0 / words.size();
@@ -136,15 +125,6 @@ public:
 
         if (raw_query.empty()) {
             throw invalid_argument("Поисковый запрос не содержит слов"s);
-        }
-
-        for (const string& word : SplitIntoWords(raw_query)) {
-            if (!IsValidWord(word)) {
-                throw invalid_argument("В словах поискового запроса есть недопустимые символы с кодами от 0 до 31"s);
-            }
-            if (!IsValidMinusWord(word)) {
-                throw invalid_argument("В словах поискового запроса есть неправильно оформленные минус слова"s);
-            }
         }
 
         const Query query = ParseQuery(raw_query);
@@ -187,15 +167,6 @@ public:
             throw invalid_argument("Поисковый запрос не содержит слов"s);
         }
 
-        for (const string& word : SplitIntoWords(raw_query)) {
-            if (!IsValidWord(word)) {
-                throw invalid_argument("В словах поискового запроса есть недопустимые символы с кодами от 0 до 31"s);
-            }
-            if (!IsValidMinusWord(word)) {
-                throw invalid_argument("В словах поискового запроса есть неправильно оформленные минус слова"s);
-            }
-        }
-
         const Query query = ParseQuery(raw_query);
         vector<string> matched_words;
         for (const string& word : query.plus_words) {
@@ -223,11 +194,7 @@ public:
         if ((index < 0) || (index >= static_cast<int>(documents_.size()))) {
             throw out_of_range("Индекс переданного документа выходит за пределы допустимого диапазона "s);
         }
-
-        if ((index >= 0) && (index < static_cast<int>(documents_.size()))) {
-            return documents_index_[index];
-        }
-        return SearchServer::INVALID_DOCUMENT_ID;
+        return documents_index_[index];
     }
 
 private:
@@ -295,9 +262,14 @@ private:
     QueryWord ParseQueryWord(string text) const {
         bool is_minus = false;
         // Word shouldn't be empty
-        if ((text[0] == '-' && text[1] == '-') || (text[0] == '-' && text.size() == 1)) {
-
+        if (!IsValidMinusWord(text)) {
+            throw invalid_argument("В словах поискового запроса есть неправильно оформленные минус слова"s);
         }
+
+        if (!IsValidWord(text)) {
+            throw invalid_argument("В словах поискового запроса есть недопустимые символы с кодами от 0 до 31"s);
+        }
+
         if (text[0] == '-') {
             is_minus = true;
             text = text.substr(1);
