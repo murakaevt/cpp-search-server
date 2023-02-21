@@ -9,7 +9,7 @@ public:
     IteratorRange(Iterator begin, Iterator end)
         : first_(begin)
         , last_(end)
-        , size_(distance(first_, last_)) {
+         {
     }
 
     Iterator begin() const {
@@ -21,13 +21,13 @@ public:
     }
 
     size_t size() const {
-        return size_;
+        return distance(first_, last_);
     }
 
 private:
-    Iterator first_, last_;
-    size_t size_;
-};
+    Iterator first_,
+             last_;
+   };
 
 template <typename Iterator>
 std::ostream& operator<<(std::ostream& out, const IteratorRange<Iterator>& range) {
