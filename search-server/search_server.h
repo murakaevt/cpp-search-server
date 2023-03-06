@@ -1,24 +1,19 @@
 #pragma once
 
+#include "log_duration.h"
 #include "string_processing.h"
 #include "document.h"
 
+
+#include <map>
 #include <algorithm>
 #include <cmath>
-#include <iostream>
-#include <map>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <utility>
-#include <vector>
-#include <deque>
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
 
 class SearchServer {
-       
 public:
+
     template <typename StringContainer>
     explicit SearchServer(const StringContainer& stop_words);
 
@@ -27,15 +22,23 @@ public:
     void AddDocument(int document_id, const std::string& document, DocumentStatus status,
         const std::vector<int>& ratings);
 
+    void RemoveDocument(int document_id);
+
     template <typename DocumentPredicate>
     std::vector<Document> FindTopDocuments(const std::string& raw_query,
-        DocumentPredicate document_predicate) const; 
+        DocumentPredicate document_predicate) const;
+
     std::vector<Document> FindTopDocuments(const std::string& raw_query, DocumentStatus status) const;
+
     std::vector<Document> FindTopDocuments(const std::string& raw_query) const;
 
     int GetDocumentCount() const;
 
-    int GetDocumentId(int index) const;
+    const std::map<std::string, double>& GetWordFrequencies(int document_id) const;
+
+    std::vector<int>::const_iterator begin();
+
+    std::vector<int>::const_iterator end();
 
     std::tuple<std::vector<std::string>, DocumentStatus> MatchDocument(const std::string& raw_query,
         int document_id) const;
@@ -45,9 +48,11 @@ private:
         int rating;
         DocumentStatus status;
     };
+
     const std::set<std::string> stop_words_;
     std::map<std::string, std::map<int, double>> word_to_document_freqs_;
     std::map<int, DocumentData> documents_;
+    std::map<int, std::map<std::string, double>> id_word_freqs_;                      //новая структура с ключом - id                       
     std::vector<int> document_ids_;
 
     bool IsStopWord(const std::string& word) const;
@@ -73,12 +78,11 @@ private:
 
     Query ParseQuery(const std::string& text) const;
 
-    // Existence required
     double ComputeWordInverseDocumentFreq(const std::string& word) const;
 
     template <typename DocumentPredicate>
     std::vector<Document> FindAllDocuments(const Query& query,
-        DocumentPredicate document_predicate) const; 
+        DocumentPredicate document_predicate) const;
 };
 
 template <typename StringContainer>
@@ -94,21 +98,20 @@ SearchServer::SearchServer(const StringContainer& stop_words)
 template <typename DocumentPredicate>
 std::vector<Document> SearchServer::FindTopDocuments(const std::string& raw_query,
     DocumentPredicate document_predicate) const {
+    // LOG_DURATION_STREAM("Operation time", std::cout);
     const auto query = ParseQuery(raw_query);
 
-    auto matched_documents = FindAllDocuments(query, document_predicate);
+    auto matched_documents = SearchServer::FindAllDocuments(query, document_predicate);
 
     sort(matched_documents.begin(), matched_documents.end(),
         [](const Document& lhs, const Document& rhs) {
-            const auto abs_relevance = std::abs(lhs.relevance - rhs.relevance);
-            if (abs_relevance < 1e-6) {
+            if (std::abs(lhs.relevance - rhs.relevance) < 1e-6) {
                 return lhs.rating > rhs.rating;
             }
             else {
                 return lhs.relevance > rhs.relevance;
             }
         });
-
     if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) {
         matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
     }

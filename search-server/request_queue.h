@@ -1,36 +1,38 @@
 #pragma once
+#include "document.h"
 #include "search_server.h"
 #include <deque>
-#include <vector>
 
 class RequestQueue {
 public:
     explicit RequestQueue(const SearchServer& search_server);
 
-    // сделаем "обёртки" для всех методов поиска, чтобы сохранять результаты для нашей статистики
     template <typename DocumentPredicate>
     std::vector<Document> AddFindRequest(const std::string& raw_query, DocumentPredicate document_predicate);
+
     std::vector<Document> AddFindRequest(const std::string& raw_query, DocumentStatus status);
+
     std::vector<Document> AddFindRequest(const std::string& raw_query);
+
     int GetNoResultRequests() const;
+
 private:
     struct QueryResult {
-        std::vector<Document> found_docs;
-        int empty_count;
+        uint64_t timestamp;
+        int results;
     };
-
     std::deque<QueryResult> requests_;
+    const SearchServer& search_server_;
+    int no_results_requests_;
+    uint64_t current_time_;
     const static int min_in_day_ = 1440;
 
-    SearchServer inner_server;
-
-    void Add(QueryResult new_q);
-    // добавляем новую структуру в дек
-    void Pop();
-    // удаляем переднюю структуру из дека
-    void AddEmptyReq();
-    // если дек - битком
-                                        // выталкиваем передний
-// создаем новую структуру из пустого вектора доков и счетчика
-                                 // добавляем структуру в конец дека
+    void AddRequest(int results_num);
 };
+
+template <typename DocumentPredicate>
+std::vector<Document> RequestQueue::AddFindRequest(const std::string& raw_query, DocumentPredicate document_predicate) {
+    const auto result = search_server_.FindTopDocuments(raw_query, document_predicate);
+    RequestQueue::AddRequest(static_cast<int>(result.size()));
+    return result;
+}
