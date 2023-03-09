@@ -8,6 +8,7 @@
 #include <map>
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
 
@@ -102,10 +103,11 @@ std::vector<Document> SearchServer::FindTopDocuments(const std::string& raw_quer
     const auto query = ParseQuery(raw_query);
 
     auto matched_documents = SearchServer::FindAllDocuments(query, document_predicate);
-
+   
     sort(matched_documents.begin(), matched_documents.end(),
         [](const Document& lhs, const Document& rhs) {
-            if (std::abs(lhs.relevance - rhs.relevance) < 1e-6) {
+            constexpr double exp = 1e-6;
+            if (std::abs(lhs.relevance - rhs.relevance) < exp) {
                 return lhs.rating > rhs.rating;
             }
             else {
