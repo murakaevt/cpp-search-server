@@ -133,7 +133,7 @@ std::tuple<std::vector<std::string_view>, DocumentStatus> SearchServer::MatchDoc
     matched_words.resize(query.plus_words.size());
     auto it = std::copy_if(query.plus_words.begin(), query.plus_words.end(), matched_words.begin(),
         [&](std::string_view plus_word) {return word_to_document_freqs_.at(plus_word).count(document_id); });
-    // matched_words.resize(std::distance(matched_words.begin(), it));
+    
     std::sort(matched_words.begin(), it);
     matched_words.erase(std::unique(matched_words.begin(), it),
         matched_words.end());
@@ -163,7 +163,7 @@ std::tuple<std::vector<std::string_view>, DocumentStatus> SearchServer::MatchDoc
     matched_words.resize(query.plus_words.size());
     auto it = std::copy_if(std::execution::par, query.plus_words.begin(), query.plus_words.end(), matched_words.begin(),
         [&](std::string_view plus_word) {return word_to_document_freqs_.at(plus_word).count(document_id); });
-    // matched_words.resize(std::distance(matched_words.begin(), it));
+    
     std::sort(std::execution::par, matched_words.begin(), it);
     matched_words.erase(std::unique(std::execution::par, matched_words.begin(), it),
         matched_words.end());

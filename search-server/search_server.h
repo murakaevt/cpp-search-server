@@ -264,13 +264,7 @@ std::vector<Document> SearchServer::FindAllDocuments(std::execution::parallel_po
         });    
     
     std::vector<Document> matched_documents;
-   /* std::transform(std::execution::par, document_to_relevance.BuildOrdinaryMap().begin(), document_to_relevance.BuildOrdinaryMap().end(), matched_documents.begin(),
-        [&](auto& doc_rel) {
-                matched_documents.push_back(
-                    { doc_rel.first, doc_rel.second, documents_.at(doc_rel.first).rating }); // doc_rel.first is document_id, doc_rel.second is relevance
-         });
-   */
-    
+       
     for (const auto [document_id, relevance] : document_to_relevance.BuildOrdinaryMap()) {
         matched_documents.push_back(
             { document_id, relevance, documents_.at(document_id).rating });
