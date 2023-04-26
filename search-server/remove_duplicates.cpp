@@ -4,8 +4,8 @@
 void RemoveDuplicates(SearchServer& search_server) {
     SearchServer& inner = search_server;
     std::vector<int> ids_to_delete;
-    std::set<std::string> doc_words;
-    std::map<std::set<std::string>, int> scanning_list;                  //создаем словарь где ключ - сет слов, а значение - id
+    std::set<std::string_view> doc_words;
+    std::map<std::set<std::string_view>, int> scanning_list;                  //создаем словарь где ключ - сет слов, а значение - id
 
     for (const int doc_id : inner) {                                     // итерируемся по словарю id_word_freqs
         for (auto [word, _] : inner.GetWordFrequencies(doc_id)) {        // итерируемся по внутреннему словарю значений получив его функцией по ключу = id

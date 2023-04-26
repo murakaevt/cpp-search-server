@@ -9,7 +9,7 @@ public:
     IteratorRange(Iterator begin, Iterator end)
         : first_(begin)
         , last_(end)
-         {
+    {
     }
 
     Iterator begin() const {
@@ -26,8 +26,8 @@ public:
 
 private:
     Iterator first_,
-             last_;
-   };
+        last_;
+};
 
 template <typename Iterator>
 std::ostream& operator<<(std::ostream& out, const IteratorRange<Iterator>& range) {
@@ -71,5 +71,3 @@ template <typename Container>
 auto Paginate(const Container& c, size_t page_size) {
     return Paginator(begin(c), end(c), page_size);
 }
-
-

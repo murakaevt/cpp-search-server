@@ -17,6 +17,9 @@ public:
     LogDuration(const std::string& id) : id_(id) {
     }
 
+    LogDuration(const std::string_view& id) : id_(id) {
+    }
+
     ~LogDuration() {
         const auto end_time = steady_clock::now();
         const auto dur = end_time - start_time_;
